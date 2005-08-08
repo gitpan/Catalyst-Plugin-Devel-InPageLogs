@@ -6,7 +6,7 @@ use warnings;
 use Catalyst::Plugin::Devel::InPageLogs::Log;
 use NEXT;
 
-our $VERSION = '0.01_01';
+our $VERSION = '0.01_02';
 
 # hash key to use when saving plugin data into context
 our $plugin_dataname  = 'inpagelogs';
@@ -51,7 +51,7 @@ are missed at end of a request (see L<"LIMITATIONS">).
 
 Please note that B<only during processing of requests> are debug messages
 are captured and displayed.
-This means the only debug calls from controller, model, and view 
+This means that only debug calls from controller, model, and view 
 routines will be handled.
 This is not a real limitation as only these messages I<could>
 be added to the web page.
@@ -528,7 +528,7 @@ L<Catalyst>, L<Catalyst::Log>.
 
 =head1 AUTHOR
 
-Thomas L. Shinnick  shenme nearby-to gmail.com
+Thomas L. Shinnick  <tshinnic@cpan.org>
 
 =head1 LICENSE
 

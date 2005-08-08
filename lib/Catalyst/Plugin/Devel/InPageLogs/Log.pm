@@ -5,7 +5,7 @@ use warnings;
 
 use base 'Catalyst::Log';
 
-our $VERSION = '0.01_01';
+our $VERSION = '0.01_02';
 
 ## # hash key to use when saving plugin data into context
 ## our $plugin_dataname  = '_inpagelogs';

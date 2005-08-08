@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Plugin-Devel-InPageLogs
-version: 0.01_01
+version: 0.01_02
 author:
   - Thomas L. Shinnick <tshinnic@cpan.org>
 abstract: Append Catalyst request debug messages to output web page
@@ -12,8 +12,8 @@ requires:
 provides:
   Catalyst::Plugin::Devel::InPageLogs:
     file: lib/Catalyst/Plugin/Devel/InPageLogs.pm
-    version: 0.01_01
+    version: 0.01_02
   Catalyst::Plugin::Devel::InPageLogs::Log:
     file: lib/Catalyst/Plugin/Devel/InPageLogs/Log.pm
-    version: 0.01_01
+    version: 0.01_02
 generated_by: Module::Build version 0.2611

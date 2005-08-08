@@ -35,7 +35,7 @@ DESCRIPTION
     messages are missed at end of a request (see "LIMITATIONS").
 
     Please note that only during processing of requests are debug messages
-    are captured and displayed.  This means the only debug calls from
+    are captured and displayed.  This means that only debug calls from
     controller, model, and view routines will be handled.  This is not a
     real limitation as only these messages *could* be added to the web page.
 
@@ -244,7 +244,7 @@ SEE ALSO
 
 AUTHOR
 
-    Thomas L. Shinnick  shenme nearby-to gmail.com
+    Thomas L. Shinnick  <tshinnic@cpan.org>
 
 COPYRIGHT AND LICENSE
 
