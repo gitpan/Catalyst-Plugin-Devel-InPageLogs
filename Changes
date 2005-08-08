@@ -1,0 +1,6 @@
+Revision history for Catalyst-Plugin-Devel-InPageLogs
+
+0.01_01  Sun Aug  7 17:42:02 2005
+       Initial release for review.
+       Refactoring of Log.pm yet to be done.
+

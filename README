@@ -1,0 +1,254 @@
+NAME
+
+    Catalyst::Plugin::Devel::InPageLogs - append Catalyst request debug 
+        messages to output HTML web page
+
+SYNOPSIS
+
+        use Catalyst 'Devel::InPageLogs';
+
+        # These are the default values
+        __PACKAGE__->config->{inpagelogs} = { 
+            enabled    => 1,
+            passthru   => 1,
+            addcaller  => 1,
+            shortnames => 'dbg,dbgf',
+        };
+
+        # In MyApp::C::SuperHero
+        $c->dbgf( "Leaped over %d tall buildings", $count );
+
+DESCRIPTION
+
+    This plugin module for the Catalyst framework provides a means to
+    capture debugging messages and append them to the end of web page
+    output.  The automatic display of debug messages in the same web page
+    with normal HTML output can be very convenient during development.
+
+    One way to think about this plugin is to compare it with the Unix 'tee'
+    command.  Debug log messages continue to display using the core logger
+    Catalyst::Log, but are also captured and displayed in the browser.
+
+    Almost all debug/info/etc. messages created during processing of one
+    HTTP request are returned in the generated HTML page, grouped together
+    and appended to the end of the displayed HTML.  A few core debug
+    messages are missed at end of a request (see "LIMITATIONS").
+
+    Please note that only during processing of requests are debug messages
+    are captured and displayed.  This means the only debug calls from
+    controller, model, and view routines will be handled.  This is not a
+    real limitation as only these messages *could* be added to the web page.
+
+    If care for security issues is taken then this facility could even be
+    enabled at will using URL parameters.  This could be *very* helpful when
+    only the beta tester's browser is close at hand.
+
+    In addition to the normal debug, warn, etc. routines documented for
+    Catalyst::Log, this plugin adds two convenience methods.  These two
+    methods combine shorter names with added information noting the calling
+    location.  One of these add-on methods also conveniently handles sprintf
+    formatting.
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
+
+Alternatively, to install without Module::Build, you can use the 
+following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+
+DEPENDENCIES
+
+Catalyst
+
+
+CONFIGURATION OPTIONS
+
+    Some plugin behavior can be controlled by configuration options.  You
+    can modify the defaults by specifying values using the
+    "__PACKAGE__->config->{inpagelogs}" key.
+
+  enabled
+
+    The plugin can be disabled by setting this value to zero.  You may want
+    to do this to leave the code unchanged but prevent debug output from
+    being seen when not in development.  A warning log message will be
+    generated noting that the plugin is installed but disabled.
+
+  passthru
+
+    The plugin defaults to 'tee' mode - passing calls to debug/warn/etc.  to
+    the core logger after capturing them.  Messages will be displayed in
+    both the normal log and in the web page.
+
+    If you want debug messages displayed only in the web page you can set
+    this config value to zero.
+
+  shortnames
+
+    As a convenience for the developer, the plugin will define short name
+    aliases for the add-on debug routines.
+
+    You may change the short name symbol definitions used if the defaults
+    would conflict with existing other code.  Set the config value to a
+    string of two name symbols separated by a comma:
+
+            shortname => "bugout,bugfmt",
+
+    The first name is aliased to the "capture a set of messages" routine. 
+    The second name is aliased to the "format a message and capture it"
+    routine.
+
+  addcaller
+
+    The add-on debug routines (normally 'dbg' and 'dbgf') will record caller
+    information in each message.  The calling filename and linenumber will
+    be added after the timestamp.
+
+    If you do not want this added information, set this config value to
+    zero.
+
+METHODS
+
+  EXTENDED METHODS
+
+   prepare_request
+
+    Setup plugin-specific data area in the current request.
+
+    This plugin method will create and attach a work area to the current
+    request context.  The work area will contain the array used to collect
+    the captured debug messages.  The existing core logger object reference
+    is saved before installing our own logger object.
+
+   finalize
+
+    This plugin method will check whether captured debug messages can be
+    appended to the current output body.  Only content type 'text/html'
+    output will be updated.
+
+    The saved previous logger object will be restored at this point.
+
+  INTERNAL METHODS
+
+   inpagelogs_data  - access to plugin-specific data area
+
+        $data_area = $c->inpagelogs_data;
+
+    Return reference to work area for this plugin during this request.  If
+    no work area was created (perhaps because plugin is disabled) then
+    "undef" is returned.
+
+   inpagelogs_config   - access to plugin-specific config area
+
+        $config_area = $c->inpagelogs_config;
+
+    Return reference to config hash section for this plugin, if present. 
+    Otherwise "undef" will be returned.
+
+   is_inpagelogs_enabled - check config flag
+
+        return  unless $c->is_inpagelogs_enabled;
+
+    The default is to assume the installed plugin is enabled, unless
+
+    'inpagelogs' config section is present, and
+    'enabled' flag value is present, and
+    the value is set to zero
+
+  PUBLIC METHODS
+
+   inpagelogs_add_msg - add messages to our capture array
+
+        $c->inpagelogs_add_msg( 
+                'Whoa! What they said!', 
+                "  parameter was '$he_said_she_said'" );
+
+    This method will take one or more strings and save them in the capture
+    buffer for later display.
+
+    The only formatting done is to add a "\n" to the end of every string
+    that does not already end with "\n".
+
+   inpagelogs_log_msg   - capture debug messages
+
+    Add a list of strings to captured debug messages.
+
+   inpagelogs_log_msgf  - sprintf format parameters and capture debug message
+
+        $c->inpagelogs_log_msgf( "I saw a huge number '%12.3g'\n", $value );
+
+    Process a format and parameters using sprintf, then add result to
+    captured debug messages.
+
+   inpagelogs_log_msgsub  - internal debug message capture routine
+
+    This routine handles the final formatting of messages added to the
+    capture array.
+
+    The formatted current time will prefix the first message.  The time is
+    formatted using overridable routine "_log_time_formatter".
+
+    By default the caller information, filename and line number, will be
+    formatted and also added before the first message.  This can be
+    controlled by configuration option "addcaller".
+
+LIMITATIONS
+
+  MISSED MESSAGES
+
+    Due to the sequence of Catalyst internal operations and calls to the
+    plugin methods, some debug messages at the very end of processing for a
+    request cannot be seen by this plugin.
+
+    Specifically (and most regretably) the displayed output table showing
+    the actions executed for the request are not captured, e.g.
+
+      [Wed Aug  3 16:30:39 2005] [catalyst] [info] Request took 0.27s (3.70/s)
+      .=---------------------------------------------+----------=.
+      | Action                                       | Time      |
+      |=---------------------------------------------+----------=|
+      | /begin                                       | 0.000955s |
+      | -> /user/upld/phase2page                     | 0.000614s |
+      | /user/upld/phase1                            | 0.002515s |
+      | -> Widget::V::TT->process                    | 0.228791s |
+      | /user/upld/end                               | 0.230610s |
+      '=---------------------------------------------+----------='
+
+    will not be seen except in the core logger output.
+
+  NOT INTEGRATED WITH DEFAULT ERROR PAGE
+
+    The 'pretty' error page displayed by Catalyst upon an exception does not
+    include any debug messages captured by this plugin.
+
+TODOS
+
+    Figure out how to add our messages to Catalyst exception page
+    Propose patch to move logging of action execution summary earlier?
+    Use check "if ( $c->isa('Catalyst::Plugin::Devel::InPageLogs') )" ?
+
+SEE ALSO
+
+    Catalyst, Catalyst::Log.
+
+AUTHOR
+
+    Thomas L. Shinnick  shenme nearby-to gmail.com
+
+COPYRIGHT AND LICENSE
+
+Copyright (C) 2005, Thomas L. Shinnick
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
